@@ -37,7 +37,8 @@
                 />
               </v-col>
 
-              <v-col class="py-1" cols="12">
+              <!-- Só exibe "Senha" no modo de criação -->
+              <v-col class="py-1" cols="12" v-if="!isEdit">
                 <v-text-field
                   v-model="user.password"
                   label="Senha"
@@ -54,6 +55,29 @@
                     >
                       <v-icon small>{{
                         showPassword ? "mdi-eye" : "mdi-eye-off"
+                      }}</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+              </v-col>
+
+              <v-col class="py-1" cols="12" v-if="props.operation === 'update'">
+                <v-text-field
+                  v-model="user.current_password"
+                  label="Confirmar Senha"
+                  :error-messages="errors.current_password"
+                  :type="showCurrentPassword ? 'text' : 'password'"
+                  outlined
+                >
+                  <template v-slot:append-inner>
+                    <v-btn
+                      icon
+                      @click="showCurrentPassword = !showCurrentPassword"
+                      x-small
+                      class="mt-n1"
+                    >
+                      <v-icon small>{{
+                        showCurrentPassword ? "mdi-eye" : "mdi-eye-off"
                       }}</v-icon>
                     </v-btn>
                   </template>
@@ -91,6 +115,7 @@ interface User {
   tax_id: string;
   email: string;
   password: string;
+  current_password: string;
 }
 
 //Props
@@ -147,6 +172,8 @@ const errors = ref<any>({
   password: "",
 });
 const isEditing = ref(false);
+const showCurrentPassword = ref(false);
+const isEdit = ref(false);
 const userID = ref(null);
 const schema = z.object({
   name: z.string().min(1, { message: "Preencha o campo nome!" }),
@@ -205,7 +232,7 @@ const createUser = () => {
       emit("alert", "Usuário criado com sucesso!!", "success");
     })
     .catch((error) => {
-      emit("alert", "erro ao criar o usuário", "error");
+      emit("alert", error.response.data.message, "error");
     });
 };
 

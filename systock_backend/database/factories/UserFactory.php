@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'itin' => $this->faker->unique()->numberBetween(100000000, 999999999),
+            'tax_id' => $this->faker->unique()->numberBetween(100000000, 999999999),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

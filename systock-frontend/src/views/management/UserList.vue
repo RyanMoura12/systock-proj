@@ -17,9 +17,26 @@
     :apiUrl="'v1/users'"
   ></DialogDelete>
 
-  <v-card>
+  <v-card color="#1e1e1e" class="pa-5 rounded-lg">
     <v-container>
+      <v-card-title class="text-h5 text-white">Lista de usuários</v-card-title>
       <Alert ref="alert" />
+      <v-row>
+        <v-col cols="10">
+          <v-text-field
+            density="compact"
+            v-model="search"
+            label="Pesquisar"
+            hide-details
+            variant="outlined"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2" class="text-right">
+          <v-btn color="primary" @click="newItem" class="ml-auto">
+            <v-icon class="mr-2">mdi-plus</v-icon>Novo
+          </v-btn>
+        </v-col>
+      </v-row>
       <v-data-table
         class="elevation-1 mt-5"
         :headers="(headers as any)"
@@ -27,26 +44,9 @@
         item-value="name"
         :items="rowData"
         :search="search"
+        :items-per-page="5"
+        dark
       >
-        <template v-slot:top>
-          <v-toolbar flat color="white">
-            <v-text-field
-              class="mr-3"
-              outlined
-              dense
-              v-model="search"
-              append-icon="mdi-magnify"
-              label="Busca"
-              single-line
-              full-width
-              hide-details
-            />
-            <v-btn color="primary" @click="newItem" dark>
-              <span class="text-md-subtitle-2">Novo</span>
-            </v-btn>
-          </v-toolbar>
-        </template>
-
         <template v-slot:item.actions="{ item }">
           <v-icon
             small
@@ -84,6 +84,7 @@ interface User {
   tax_id: string;
   email: string;
   password: string;
+  current_password: string;
 }
 
 //alerts

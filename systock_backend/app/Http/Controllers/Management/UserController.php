@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Management;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-// use App\Http\Controllers\Management\Hash;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+
+
 
 
 
@@ -34,60 +36,54 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'tax_id' => 'required|string|max:14',
+            'tax_id' => 'required|string|unique:users,tax_id|max:14',
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:6',
         ], [
             'name.required' => 'O nome é obrigatório.',
             'tax_id.required' => 'O CPF/CNPJ é obrigatório.',
+            'tax_id.unique' => 'O CPF/CNPJ já está em uso.',
             'email.required' => 'O e-mail é obrigatório.',
+            'email.unique' => 'O e-mail já está em uso.',
             'password.required' => 'A senha é obrigatória.',
         ]);
 
+        if ($validator->fails()) {
+            throw ValidationException::withMessages($validator->errors()->toArray());
+        }
         $user = User::create([
             'name' => $request->name,
             'tax_id' => $request->tax_id,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
         return response()->json(['message' => 'Usuário criado com sucesso!', 'user' => $user], 201);
     }
 
     public function update(Request $request, $id)
     {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'tax_id' => 'required|string|max:14',
-        'email' => 'required|string|email|unique:users,email,' . $id . ',id',
-        'password' => 'nullable|string|min:6',
-    ], [
-        'name.required' => 'O nome é obrigatório.',
-        'tax_id.required' => 'O CPF/CNPJ é obrigatório.',
-        'email.required' => 'O e-mail é obrigatório.',
-        'password.required' => 'A senha é obrigatória.',
-    ]);
+        $request->validate([
+            'current_password' => 'required|string',
+            'name' => 'required|string|max:255',
+            'tax_id' => 'required|string|max:14',
+            'email' => 'required|string|email|unique:users,email,' . $id . ',id',
+        ]);
 
-    $user = User::find($id);
+        $user = User::findOrFail($id);
+                if (!Hash::check($request->current_password, $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Senha atual incorreta.'],
+            ]);
+        }
 
-    if (!$user) {
-        return response()->json(['message' => 'Usuário não encontrado.'], 404);
+        $user->update($request->only(['name', 'tax_id', 'email']));
+
+        return response()->json(['message' => 'Usuário atualizado com sucesso!', 'user' => $user], 200);
     }
 
-    $user->name = $request->name;
-    $user->tax_id = $request->tax_id;
-    $user->email = $request->email;
-
-    if ($request->password) {
-        $user->password = Hash::make($request->password);
-    }
-
-    $user->save();
-
-    return response()->json(['message' => 'Usuário atualizado com sucesso!', 'user' => $user], 200);
-}
 
 
 public function destroy($id)

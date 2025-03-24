@@ -19,5 +19,5 @@ import { createApp } from "vue";
 const app = createApp(App);
 
 registerPlugins(app);
-app.directive("mask", mask); // Registrar diretiva antes de montar
-app.mount("#app"); // Montar após todas as configurações
+app.directive("mask", mask);
+app.mount("#app");
