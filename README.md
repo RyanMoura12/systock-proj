@@ -73,3 +73,15 @@ php artisan serve
 ```bash
 npm install
 ```
+
+e após as instalação das dependências, execute
+
+```bash
+npm run dev
+```
+
+caso queira uma porta especifica
+
+```bash
+npm run dev -- --port 8082
+```
